@@ -21,6 +21,7 @@ import io
 import os
 import glob
 import shutil
+import uuid
 
 from tornado import web
 
@@ -30,6 +31,19 @@ from IPython.utils.traitlets import Unicode, Bool, TraitError
 from IPython.utils.py3compat import getcwd
 from IPython.utils import tz
 from IPython.html.utils import is_hidden, to_os_path
+from IPython.utils.tz import utcnow, tzUTC
+
+METADATA_NBNAME = 'x-object-meta-nbname'
+METADATA_CHK_ID = 'x-object-meta-checkpoint-id'
+METADATA_LAST_MODIFIED = 'x-object-meta-nb-last-modified'
+METADATA_NB_ID = 'x-object-meta-notebook-id'
+
+DATE_FORMAT = "%X-%x"
+
+NB_DNEXIST_ERR = 'Notebook does not exist: {}'
+NB_SAVE_UNK_ERR = 'Unexpected error while saving notebook: {}'
+NB_DEL_UNK_ERR = 'Unexpected error while deleting notebook: {}'
+CHK_SAVE_UNK_ERR = 'Unexpected error while saving checkpoint: {}'
 
 def sort_key(item):
     """Case-insensitive sorting."""
@@ -40,6 +54,10 @@ def sort_key(item):
 #-----------------------------------------------------------------------------
 
 class FileNotebookManager(NotebookManager):
+
+    user_agent = "bookstore v{version}".format(version='1.0.0')
+    container_name = Unicode('notebooks', config=True,
+                             help='Container name for notebooks.')    
     
     save_script = Bool(False, config=True,
         help="""Automatically create a Python script when saving the notebook.
@@ -390,7 +408,14 @@ class FileNotebookManager(NotebookManager):
             shutil.move(old_py_path, new_py_path)
   
     # Checkpoint-related utilities
-    
+    def get_checkpoints_home(self, path=''):
+        """find the home path to the checkpoints"""
+        path = path.strip('/')
+        os_path = os.path.join(self._get_os_path(path=path), self.checkpoint_dir)
+        if not os.path.exists(os_path):
+            os.mkdir(os_path)
+        return os_path
+
     def get_checkpoint_path(self, checkpoint_id, name, path=''):
         """find the path to a checkpoint"""
         path = path.strip('/')
@@ -420,13 +445,17 @@ class FileNotebookManager(NotebookManager):
         return info
         
     # public checkpoint API
+
+    def new_checkpoint_id(self):
+        """Generate a new checkpoint_id and store its mapping."""
+        return unicode(uuid.uuid4())
     
     def create_checkpoint(self, name, path=''):
         """Create a checkpoint from the current state of a notebook"""
         path = path.strip('/')
         nb_path = self._get_os_path(name, path)
         # only the one checkpoint ID:
-        checkpoint_id = u"checkpoint"
+        checkpoint_id = self.new_checkpoint_id()
         cp_path = self.get_checkpoint_path(checkpoint_id, name, path)
         self.log.debug("creating checkpoint for notebook %s", name)
         if not os.path.exists(self.checkpoint_dir):
@@ -444,11 +473,28 @@ class FileNotebookManager(NotebookManager):
         path = path.strip('/')
         checkpoint_id = "checkpoint"
         os_path = self.get_checkpoint_path(checkpoint_id, name, path)
-        if not os.path.exists(os_path):
+        self.log.debug('name=%s', self.get_checkpoints_home(path))
+        basename, _ = os.path.splitext(name)
+
+        cp_path = os.path.join(self.get_checkpoints_home(path), basename + '-*' + self.filename_ext)
+        os_paths = glob.glob(cp_path)
+        
+        if not os_paths:
             return []
-        else:
-            print [self.get_checkpoint_model(checkpoint_id, name, path)]
-            return [self.get_checkpoint_model(checkpoint_id, name, path)]
+        models = []
+        for p in os_paths:
+            base_name, _ = os.path.splitext(p)
+            self.log.debug('basename=%s', base_name.split(basename + '-'))
+            checkpoint_id = base_name.split(basename + '-')[1]
+            models.append(self.get_checkpoint_model(checkpoint_id, name, path))
+
+
+            # self.log.debug("map=%s", map(self.get_checkpoint_model, path, os_paths))
+            # self.log.debug([self.get_checkpoint_model(checkpoint_id, name, path)])
+            # print [self.get_checkpoint_model(checkpoint_id, name, path)]
+            # return [self.get_checkpoint_model(checkpoint_id, name, path)]
+        self.log.debug('models=%s', models)
+        return models
         
     
     def restore_checkpoint(self, checkpoint_id, name, path=''):

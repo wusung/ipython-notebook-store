@@ -7,8 +7,11 @@ Tests for bookstore
 
 from unittest import TestCase
 import doctest
+import logging
 
 from bookstore.filenotebookmanager import FileNotebookManager
+
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 class TestFileNotebookManager(TestCase):
     def setUp(self):
@@ -25,4 +28,8 @@ class TestFileNotebookManager(TestCase):
 
     def test_create_checkpoint(self):
     	filenotebookManager = FileNotebookManager()
-        FileNotebookManager.create_checkpoint(name='test1', path='')
+        #filenotebookManager.create_checkpoint(name = 'test1.ipynb')
+
+    def test_list_checkpoint(self):
+    	filenotebookManager = FileNotebookManager()
+    	filenotebookManager.list_checkpoints(name = 'test1.ipynb')

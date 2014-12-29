@@ -484,15 +484,8 @@ class FileNotebookManager(NotebookManager):
         models = []
         for p in os_paths:
             base_name, _ = os.path.splitext(p)
-            self.log.debug('basename=%s', base_name.split(basename + '-'))
             checkpoint_id = base_name.split(basename + '-')[1]
             models.append(self.get_checkpoint_model(checkpoint_id, name, path))
-
-
-            # self.log.debug("map=%s", map(self.get_checkpoint_model, path, os_paths))
-            # self.log.debug([self.get_checkpoint_model(checkpoint_id, name, path)])
-            # print [self.get_checkpoint_model(checkpoint_id, name, path)]
-            # return [self.get_checkpoint_model(checkpoint_id, name, path)]
         self.log.debug('models=%s', models)
         return models
         

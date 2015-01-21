@@ -45,7 +45,7 @@ Alternatively, you can always pull from the master branch if you're the adventur
 
 .. code-block:: bash
 
-    $ pip install git+https://github.com/wusung/ipython-notebook-store.git
+    $ pip install git+https://wusung@bitbucket.org/wusung/ipython-bookstore.git
 
 Installation isn't the end though. You need to configure your account details
 as well as where you'll be storing the notebooks.
@@ -100,4 +100,3 @@ Contributing
 
 Send a pull request on `GitHub <https://github.com/wusung/ipython-notebook-store>`_. It's
 that simple. More than happy to respond to issues on GitHub as well.
-

@@ -44,6 +44,7 @@ NB_DNEXIST_ERR = 'Notebook does not exist: {}'
 NB_SAVE_UNK_ERR = 'Unexpected error while saving notebook: {}'
 NB_DEL_UNK_ERR = 'Unexpected error while deleting notebook: {}'
 CHK_SAVE_UNK_ERR = 'Unexpected error while saving checkpoint: {}'
+MAX_HISTORY_SIZE = 15
 
 def sort_key(item):
     """Case-insensitive sorting."""
@@ -478,6 +479,7 @@ class FileNotebookManager(NotebookManager):
 
         cp_path = os.path.join(self.get_checkpoints_home(path), basename + '-*' + self.filename_ext)
         os_paths = glob.glob(cp_path)
+        os_paths.sort(key=os.path.getmtime)
         
         if not os_paths:
             return []

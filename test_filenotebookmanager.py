@@ -28,7 +28,7 @@ class TestFileNotebookManager(TestCase):
 
     def test_create_checkpoint(self):
     	filenotebookManager = FileNotebookManager()
-        #filenotebookManager.create_checkpoint(name = 'test1.ipynb')
+        filenotebookManager.create_checkpoint(name = 'test1.ipynb')
 
     def test_list_checkpoint(self):
     	filenotebookManager = FileNotebookManager()

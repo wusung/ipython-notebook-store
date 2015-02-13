@@ -479,7 +479,7 @@ class FileNotebookManager(NotebookManager):
 
         cp_path = os.path.join(self.get_checkpoints_home(path), basename + '-*' + self.filename_ext)
         os_paths = glob.glob(cp_path)
-        os_paths.sort(key=os.path.getmtime)
+        os_paths.sort(key=os.path.getmtime, reverse=True)
         
         if not os_paths:
             return []

@@ -50,7 +50,7 @@ Alternatively, you can always pull from the master branch if you're the adventur
 
 .. code-block:: bash
 
-    $ pip install git+https://github.com/wusung/ipython-notebook-store.git
+    $ pip install --upgrade git+https://github.com/wusung/ipython-notebook-store.git
 
 Installation isn't the end though. You need to configure your account details
 as well as where you'll be storing the notebooks.

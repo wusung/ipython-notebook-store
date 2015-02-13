@@ -488,8 +488,8 @@ class FileNotebookManager(NotebookManager):
             base_name, _ = os.path.splitext(p)
             checkpoint_id = base_name.split(basename + '-')[1]
             models.append(self.get_checkpoint_model(checkpoint_id, name, path))
-        self.log.debug('models=%s', models)
-        return models
+        self.log.debug('models=%s', len(models[:MAX_HISTORY_SIZE]))
+        return models[:MAX_HISTORY_SIZE]
         
     
     def restore_checkpoint(self, checkpoint_id, name, path=''):
